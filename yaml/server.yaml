@@ -1,0 +1,53 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: server
+  namespace: default
+  labels:
+    app: server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: server-pod
+  template:
+    metadata:
+      name: server-pod
+      labels:
+        app: server-pod
+    spec:
+      volumes:
+        - name: sources
+          hostPath:
+            path: /run/desktop/mnt/host/d/Jie/tmp/docker/sources
+      containers:
+        - name: node-test-server
+          image: codejie/node_test:v0.1
+          ports:
+            - name: http
+              containerPort: 4000
+          env:
+            - name: ENV
+              value: product
+            - name: Terminal
+              value: server
+          volumeMounts:
+            - mountPath: /sources
+              name: sources
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: server-service
+  namespace: default
+spec:
+  selector:
+    app: server-pod
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+      nodePort: 32001
+  type: LoadBalancer

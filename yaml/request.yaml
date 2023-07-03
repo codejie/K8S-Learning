@@ -1,0 +1,54 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: request
+  namespace: default
+  labels:
+    app: request
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: request-pod
+  template:
+    metadata:
+      name: request-pod
+      namespace: default
+      labels:
+        app: request-pod
+    spec:
+      volumes:
+        - name: sources
+          hostPath:
+            path: /run/desktop/mnt/host/d/Jie/tmp/docker/sources
+      containers:
+        - name: node-test-request
+          image: codejie/node_test:v0.1
+          env:
+            - name: ENV
+              value: product
+            - name: Terminal
+              value: request
+            - name: Address
+              # value: "http://10.1.0.184:4000/"
+              # value: "http://10.107.142.116:4000"
+              value: "http://server-service:4000"
+          volumeMounts:
+            - mountPath: /sources
+              name: sources
+
+
+# ---
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: server-service
+#   namespace: default
+# spec:
+#   selector:
+#     app: server-pod
+#   ports:
+#     - port: 4000
+#       targetPort: 4000
+#       name: http
+#   type: NodePort
